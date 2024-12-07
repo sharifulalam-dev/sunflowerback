@@ -110,10 +110,8 @@ app.get("/application", async (req, res) => {
     const database = client.db("visahub");
     const collection = database.collection("applications");
 
-    // Fetch applications from the collection
     const application = await collection.find().toArray();
 
-    // Send response inside the try block
     res.status(200).json(application);
   } catch (error) {
     console.error("Error fetching Application:", error);
