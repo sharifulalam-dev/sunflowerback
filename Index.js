@@ -155,6 +155,28 @@ app.get("/myvisas", async (req, res) => {
   }
 });
 
+app.delete("/all-visas/:id", async (req, res) => {
+  const database = client.db("visahub");
+  const collection = database.collection("visas");
+  await collection.deleteOne({ _id: new ObjectId(req.params.id) });
+  res.status(200).json({ message: "Visa deleted successfully" });
+});
+
+app.patch("/all-visas/:id", async (req, res) => {
+  const { id } = req.params;
+  const { _id, ...updateFields } = req.body; // Exclude _id from updates
+
+  const database = client.db("visahub");
+  const collection = database.collection("visas");
+
+  await collection.updateOne(
+    { _id: new ObjectId(id) }, // Match the document by _id
+    { $set: updateFields } // Update other fields
+  );
+
+  res.json({ message: "Visa updated successfully" });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
