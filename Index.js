@@ -11,9 +11,9 @@ app.use(cors());
 app.use(express.json());
 
 const uri = "mongodb://localhost:27017";
-
-// const uri =
-//   "mongodb+srv://<db_username>:<db_password>@cluster0.ey46t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const username = process.env.MONGO_USERNAME;
+const password = process.env.MONGO_PASSWORD;
+//const uri = `mongodb+srv://${username}:${password}@cluster0.ey46t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -107,14 +107,16 @@ app.post("/application", async (req, res) => {
 
 app.get("/application", async (req, res) => {
   try {
+    const { email } = req.query;
+
     const database = client.db("visahub");
     const collection = database.collection("applications");
 
-    const application = await collection.find().toArray();
+    const applications = await collection.find({ email }).toArray();
 
-    res.status(200).json(application);
+    res.status(200).json(applications);
   } catch (error) {
-    console.error("Error fetching Application:", error);
+    console.error("Error fetching applications:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
@@ -164,15 +166,12 @@ app.delete("/all-visas/:id", async (req, res) => {
 
 app.patch("/all-visas/:id", async (req, res) => {
   const { id } = req.params;
-  const { _id, ...updateFields } = req.body; // Exclude _id from updates
+  const { _id, ...updateFields } = req.body;
 
   const database = client.db("visahub");
   const collection = database.collection("visas");
 
-  await collection.updateOne(
-    { _id: new ObjectId(id) }, // Match the document by _id
-    { $set: updateFields } // Update other fields
-  );
+  await collection.updateOne({ _id: new ObjectId(id) }, { $set: updateFields });
 
   res.json({ message: "Visa updated successfully" });
 });
