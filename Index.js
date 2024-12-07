@@ -44,6 +44,24 @@ app.get("/all-visas", async (req, res) => {
   }
 });
 
+app.get("/", async (req, res) => {
+  try {
+    const database = client.db("visahub");
+    const collection = database.collection("visas");
+
+    const latestData = await collection
+      .find({})
+      .sort({ _id: -1 })
+      .limit(6)
+      .toArray();
+
+    res.status(200).json(latestData);
+  } catch (error) {
+    console.error("Error fetching  data:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 app.get("/visa-details/:id", async (req, res) => {
   const id = req.params.id;
 
